@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 		perror("Failed to fchmod");
 		return 3;
 	}
-	struct timespec am_time[2] = {stat_buf.st_atime, 0, stat_buf.st_mtime, 0};
+	struct timespec am_time[2] = {{stat_buf.st_atime, 0},{stat_buf.st_mtime, 0}};
 		
 	while (1){
 		uint8_t buf[4096];
