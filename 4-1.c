@@ -7,7 +7,8 @@
 
 int main(int argc, char *argv[])
 {
-	if (argc != 3){
+	if (argc != 3)
+	{
 		printf("Usage: %s [source file] [target file]\n", argv[0]);
 		return 1;
 	}

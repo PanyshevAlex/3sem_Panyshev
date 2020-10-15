@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 		perror("Failed to stat");
 		return 2;
 	}
-
+	printf("File: \"%s\"\n", argv[0]);
 	printf("Mode: %06o\n", stat_buf.st_mode);
 	printf("Size: %llu\n", (unsigned long long)stat_buf.st_size);
 	printf("Used space: %llu\n", (unsigned long long)stat_buf.st_blocks * 512);
