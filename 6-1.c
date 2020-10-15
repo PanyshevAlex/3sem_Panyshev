@@ -3,7 +3,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#define MAX_PATH 4096
+#include <limits.h>
 
 void is_type(file_mode)
 {
@@ -33,14 +33,16 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	char *dir_path = NULL;
+
 	if (argc == 1)
 	{
-		if (getcwd(dir_path,sizeof(dir_path)))
+		char current_dir_path[PATH_MAX];
+		if (getcwd(current_dir_path,sizeof(current_dir_path)) == NULL)
 		{
-			perror("Failed to getwd");
+			perror("Failed to getcwd");
 			return 2;
 		}
-		printf("+---%s\n", dir_path);
+		dir_path = current_dir_path;
 	}
 	if (argc == 2)
 	{	
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
 	struct stat stat_buf;
 	printf("%-20s%s\n", "type", "name");
 	while ((dir = readdir(dir_str)) != NULL){
-		char file_path[MAX_PATH];
+		char file_path[PATH_MAX];
 		snprintf(file_path, sizeof file_path, "%s/%s", dir_path, dir->d_name);
 
 		if (lstat(file_path, &stat_buf) == -1)
