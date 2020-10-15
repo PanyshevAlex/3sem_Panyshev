@@ -2,6 +2,8 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#define MAX_PATH 4096
 
 void is_type(file_mode)
 {
@@ -25,12 +27,26 @@ void is_type(file_mode)
 
 int main(int argc, char *argv[])
 {
-	if (argc != 2)
+	if (argc > 2)
 	{
 		printf("Usage: %s [dir]", argv[1]);
 		return 1;
 	}
-	DIR *dir_str = opendir(argv[1]);
+	char *dir_path = NULL;
+	if (argc == 1)
+	{
+		if (getcwd(dir_path,sizeof(dir_path)))
+		{
+			perror("Failed to getwd");
+			return 2;
+		}
+		printf("+---%s\n", dir_path);
+	}
+	if (argc == 2)
+	{	
+		dir_path = argv[1];
+	}
+	DIR *dir_str = opendir(dir_path);
 	if (dir_str == NULL)
 	{
 		perror("Failed to opendir");
@@ -40,7 +56,10 @@ int main(int argc, char *argv[])
 	struct stat stat_buf;
 	printf("%-20s%s\n", "type", "name");
 	while ((dir = readdir(dir_str)) != NULL){
-		if (lstat(dir->d_name, &stat_buf) == -1)
+		char file_path[MAX_PATH];
+		snprintf(file_path, sizeof file_path, "%s/%s", dir_path, dir->d_name);
+
+		if (lstat(file_path, &stat_buf) == -1)
 		{
 			perror("Failed to stat");
 			return 2;
