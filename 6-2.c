@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 		is_type(stat_buf.st_mode);
 		printf("%s\n", dir->d_name);
 	}
-		
+	close(dir_fd);		
 	closedir(dir_str);
 	return 1;
 }
