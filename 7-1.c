@@ -8,7 +8,7 @@
 #include <limits.h>
 #include <string.h>
 
-int fcp(char *source_path, char  *target_dir_path, char *file_name)
+int regfilecp(char *source_path, char  *target_dir_path, char *file_name)
 {
     int src_fd = open(source_path, O_RDONLY);
     if (src_fd == -1)
@@ -120,13 +120,31 @@ int main(int argc, char *argv[])
     while ((dir = readdir(dir_str)) != NULL)
     {
         char source_path[PATH_MAX];
+        struct stat stat_buf;
         snprintf(source_path, sizeof(source_path), "%s/%s", argv[1], dir->d_name);
-        if (fcp(source_path, target_path, dir->d_name) == -1)
+        if (lstat(source_path, &stat_buf) == -1)
         {
-            perror("Failed to copy ");
+            perror("Failed to lstat:");
+            continue;
         }
-        else
-            printf("%s has been copied\n", dir->d_name);
+        if (S_ISREG(stat_buf.st_mode))
+        {
+            if (regfilecp(source_path, target_path, dir->d_name) == -1)
+            {
+                perror("Failed to copy ");
+            }
+            else
+                printf("%s has been copied\n", dir->d_name);
+        }
+        else if (S_ISDIR(stat_buf.st_mode))
+        {
+            char target_dir_path[PATH_MAX];
+            snprintf(target_dir_path, sizeof(target_dir_path), "%s/%s", target_path, dir->d_name);
+            if (mkdir(target_dir_path, stat_buf.st_mode) == -1)
+            {
+                printf("%s has been copied\n", dir->d_name);
+            }
+        }
     }
 
 
