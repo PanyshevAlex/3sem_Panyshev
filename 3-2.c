@@ -52,7 +52,6 @@ int main(int argc, char *argv[])
 		}
 			
 	}
-
 	close(src_fd);
 	close(dst_fd);
 	return 0;
