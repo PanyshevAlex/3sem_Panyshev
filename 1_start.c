@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 		return 2;
 	}
 	printf("File: \"%s\"\n", argv[0]);
-	printf("Mode:  ");
+	printf("Type:  ");
     switch (stat_buf.st_mode & S_IFMT) {
     case S_IFBLK:  printf("block device\n");            break;
     case S_IFCHR:  printf("character device\n");        break;
@@ -39,6 +39,6 @@ int main(int argc, char *argv[])
     printf("atime: %ld sec %ld nanosec\n", stat_buf.st_atimespec.tv_sec, stat_buf.st_atimespec.tv_nsec);
     printf("mtime: %ld sec %ld nanosec\n", stat_buf.st_mtimespec.tv_sec, stat_buf.st_mtimespec.tv_nsec);
     printf("ctime: %ld sec %ld nanosec\n", stat_buf.st_ctimespec.tv_sec, stat_buf.st_ctimespec.tv_nsec);
-    //UID/GItD/atime/mtime/ctime
+
 	return 0;
 }

@@ -5,24 +5,19 @@
 #include <unistd.h>
 #include <limits.h>
 
-void is_type(file_mode)
+void is_type(mode_t file_mode)
 {
-	if (S_ISREG(file_mode))
-		printf("%-20s", "REGULAR");
-	if (S_ISDIR(file_mode))
-		printf("%-20s", "DIRECTORY");
-	if (S_ISCHR(file_mode))
-		printf("%-20s", "CHARACTER SPECIAL");
-	if (S_ISBLK(file_mode))
-		printf("%-20s", "BLOCK SPECIAL");
-	if (S_ISFIFO(file_mode))
-		printf("%-20s", "FIFO");
-	if (S_ISLNK(file_mode))
-		printf("%-20s", "SYMBOLIC LINK");
-	if (S_ISSOCK(file_mode))
-		printf("%-20s", "SOCKET");
-	if (S_ISWHT(file_mode))
-		printf("%-20s", "WHITEOUT");
+
+    switch (file_mode & S_IFMT) {
+    case S_IFBLK:  printf("%-20s", "BLOCK SPECIAL");            break;
+    case S_IFCHR:  printf("%-20s", "CHARACTER SPECIAL");        break;
+    case S_IFDIR:  printf("%-20s", "DIRECTORY");               break;
+    case S_IFIFO:  printf("%-20s", "FIFO");               break;
+    case S_IFLNK:  printf("%-20s", "SYMBOLIC LINK");                 break;
+    case S_IFREG:  printf("%-20s", "REGULAR");            break;
+    case S_IFSOCK: printf("%-20s", "SOCKET");                  break;
+    default:       printf("%-20s", "unkwown?");                break;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -42,7 +37,7 @@ int main(int argc, char *argv[])
 			perror("Failed to getcwd");
 			return 2;
 		}
-		dir_path = current_dir_path;
+		dir_path = ;
 	}
 	if (argc == 2)
 	{	
