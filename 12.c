@@ -9,8 +9,17 @@
 int main(int argc, char *argv[])
 {
     struct passwd *pwd;
-    pwd = getpwuid(getuid());
-    struct group *grp = getgrgid(pwd->pw_gid);
+    if (!(pwd = getpwuid(getuid())))
+    {
+        perror("Error");
+        return 0;
+    }
+    struct group *grp;
+    if (!(grp = getgrgid(pwd->pw_gid)))
+    {
+        perror("Error");
+        return 0;
+    }    
     printf("user id: %d\n", pwd->pw_uid);
     printf("user name: %s\n", pwd->pw_name);
     printf("group id: %d\n", pwd->pw_gid);
