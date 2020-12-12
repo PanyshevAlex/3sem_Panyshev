@@ -7,6 +7,8 @@
 
 #define MSGSZ 128
 
+int messageid;
+
 typedef struct msgbuf {
     long    mtype;
     char    mtext[MSGSZ];
@@ -14,12 +16,10 @@ typedef struct msgbuf {
 
 void signal_handler(int val)
 {
-    /*
-    if (msgctl (msgid, IPC_RMID, (struct msqid_ds *) 0) < 0)
+    if (msgctl (messageid, IPC_RMID, (struct msqid_ds *) 0) < 0)
         perror("msg queue remove err");
     else
         printf("The message queue was successfully deleted. Finishing work.\n");
-    */
     exit(0);
 }
 
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     }
     else
         printf("msgget succeeded: msqid = %d\nkey: %d\n", msgid, key);
-    
+    messageid = msgid;
     while (1)
     {
         if (msgrcv(msgid, &rbuf, MSGSZ, 0, 0) < 0)
