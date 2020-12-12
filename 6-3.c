@@ -7,24 +7,34 @@
 #include <limits.h>
 #include <fcntl.h>
 
-void is_type(file_mode)
+const char *dir_type(__uint8_t type)
 {
-	if (S_ISREG(file_mode))
-		printf("%-20s", "REGULAR");
-	if (S_ISDIR(file_mode))
-		printf("%-20s", "DIRECTORY");
-	if (S_ISCHR(file_mode))
-		printf("%-20s", "CHARACTER SPECIAL");
-	if (S_ISBLK(file_mode))
-		printf("%-20s", "BLOCK SPECIAL");
-	if (S_ISFIFO(file_mode))
-		printf("%-20s", "FIFO");
-	if (S_ISLNK(file_mode))
-		printf("%-20s", "SYMBOLIC LINK");
-	if (S_ISSOCK(file_mode))
-		printf("%-20s", "SOCKET");
-	if (S_ISWHT(file_mode))
-		printf("%-20s", "WHITEOUT");
+    switch (type){
+    case DT_FIFO:   return "FIFO";                  break;
+    case DT_CHR:    return "CHARACTER SPECIAL";     break;
+    case DT_DIR:    return "DIRECTORY";             break;
+    case DT_BLK:    return "BLOCK SPECIAL";         break;
+    case DT_REG:    return "REGULAR";               break;
+    case DT_LNK:    return "SYMBOLIC LINK";         break;
+    case DT_SOCK:   return "SOCKET";                break;
+    case DT_WHT:    return "WHITEOUT";              break;
+    default: return "unknown?";                     break;
+    }   
+}
+
+const char *is_type(mode_t file_mode)
+{
+
+    switch (file_mode & S_IFMT) {
+    case S_IFBLK:  return "BLOCK SPECIAL";          break;
+    case S_IFCHR:  return "CHARACTER SPECIAL";      break;
+    case S_IFDIR:  return "DIRECTORY";              break;
+    case S_IFIFO:  return "FIFO";                   break;
+    case S_IFLNK:  return "SYMBOLIC LINK";          break;
+    case S_IFREG:  return "REGULAR";                break;
+    case S_IFSOCK: return "SOCKET";                 break;
+    default:       return "unkwown?";               break;
+    }   
 }
 
 int main(int argc, char *argv[])
@@ -34,22 +44,10 @@ int main(int argc, char *argv[])
 		printf("Usage: %s [dir]", argv[1]);
 		return 1;
 	}
-	char *dir_path = NULL;
-
-	if (argc == 1)
-	{
-		char current_dir_path[PATH_MAX];
-		if (getcwd(current_dir_path,sizeof(current_dir_path)) == NULL)
-		{
-			perror("Failed to getcwd");
-			return 2;
-		}
-		dir_path = current_dir_path;
-	}
-	if (argc == 2)
-	{	
-		dir_path = argv[1];
-	}
+    int offset = 0;
+    const char *dir_path = (argc == 2) ? argv[1] : ".";
+    struct dirent *dir;
+    struct stat stat_buf;
 	int dir_fd = open(dir_path, O_RDONLY);
 	if (dir_fd == 0)
 	{
@@ -61,18 +59,32 @@ int main(int argc, char *argv[])
     {
         char buf[16 * sizeof(struct dirent)];
         long basep = 0;
-        int count_files = __getdirentries64(dir_fd, buf, (int)sizeof(buf), &basep);
+        int count_files = __getdirentries64(dir_fd, (char *)buf, (int)sizeof(buf), &basep);
         if (count_files == -1)
         {
             perror("Failed: to getdirentfiles");
             return -1;
         }
         if (count_files == 0)
+           break;
+        while (offset < count_files)
         {
-            printf("im so sad");
-            break;
+            dir = (struct dirent *)(buf + offset);
+            if (dir->d_type == DT_UNKNOWN){
+            if (fstatat(dir_fd, dir->d_name, &stat_buf, AT_SYMLINK_NOFOLLOW) == -1)
+            {
+                perror("Failed to stat");
+                return 2;
+            }
+                printf("%-20s", is_type(stat_buf.st_mode));
+            }
+            else{
+                printf("%-20s", dir_type(dir->d_type));
+            }
+            printf("%s\n", dir->d_name);
+            offset += dir->d_reclen;
         }
-        printf("%s", buf);
+        offset = 0;
     }
 	close(dir_fd);
 	return 1;
