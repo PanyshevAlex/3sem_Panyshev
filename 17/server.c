@@ -26,7 +26,7 @@ void signal_handler(int val)
 int main(int argc, char *argv[])
 {
     int msgid;
-    int msgflg = IPC_CREAT | IPC_EXCL | 0666;
+    int msgflg = IPC_CREAT | IPC_EXCL | 0622;
     key_t key = 10;
     message_buf rbuf;
     
