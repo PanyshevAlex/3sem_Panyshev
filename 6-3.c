@@ -71,11 +71,11 @@ int main(int argc, char *argv[])
         {
             dir = (struct dirent *)(buf + offset);
             if (dir->d_type == DT_UNKNOWN){
-            if (fstatat(dir_fd, dir->d_name, &stat_buf, AT_SYMLINK_NOFOLLOW) == -1)
-            {
-                perror("Failed to stat");
-                return 2;
-            }
+                if (fstatat(dir_fd, dir->d_name, &stat_buf, AT_SYMLINK_NOFOLLOW) == -1)
+                {
+                    perror("Failed to stat");
+                    return 2;
+                }
                 printf("%-20s", is_type(stat_buf.st_mode));
             }
             else{

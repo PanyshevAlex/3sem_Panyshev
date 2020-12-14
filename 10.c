@@ -20,21 +20,14 @@ int main (int argc, const char *argv[])
         perror("Failed to open");
         return -1;
     }
-    struct kevent direvent;
-    EV_SET (&direvent, dirfd, EVFILT_VNODE, EV_ADD | EV_CLEAR | EV_ENABLE,
-            NOTE_WRITE, 0, (void *)argv[1]);
 
-    kevent(kq, &direvent, 1, NULL, 0, NULL);
+    struct kevent event;
+            EV_SET(&event, dirfd, EVFILT_VNODE, EV_ADD | EV_ENABLE | EV_CLEAR, NOTE_WRITE, 0, (void *)argv[1]);
 
-    struct kevent sigevent;
-    EV_SET (&sigevent, SIGINT, EVFILT_SIGNAL, EV_ADD | EV_ENABLE, 0, 0, NULL);
-    signal (SIGINT, SIG_IGN);
-
-    kevent(kq, &sigevent, 1, NULL, 0, NULL);
-
-    while (1) {
+  kevent(kq, &event, 1, NULL, 0, NULL); 
+  while (1) {
         struct kevent change;
-        if (kevent(kq, NULL, 0, &change, 1, NULL) == -1) { exit(1); }
+        if (kevent(kq, NULL, 0, &event, 1, NULL) == -1) { exit(1); }
         if (change.udata == NULL) {
             break;
         } else {

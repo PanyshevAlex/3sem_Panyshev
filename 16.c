@@ -4,11 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-int main(int argc, char *argv[])
+int main(void)
 {
-    int qid;
     struct msqid_ds qstatus;
-    qid = msgget((key_t)atoi(argv[1]),IPC_CREAT | 0666);
+    int qid = msgget(IPC_PRIVATE,IPC_CREAT | 0600);
 
     if (qid == -1)
     {
@@ -34,4 +33,4 @@ int main(int argc, char *argv[])
     if (msgctl (qid, IPC_RMID, (struct msqid_ds *) 0) < 0)
         perror("msg queue remove err");
     return 1;
-}  
+}

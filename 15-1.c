@@ -3,20 +3,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+int g_last_signal;
+
 void signal_handler(int val)
 {
-    if (val == 2)
-    {
-        printf("^C doesn't work buddy\n");
-    }
-    if (val == 3)
-    {
-        printf("^\\ doesn't work buddy\n");
-    }
-    if (val == 15)
-    {
-        printf("SIGTERM doesn't work buddy\n");
-    }
+    g_last_signal = val;
 }
 
 int main(){
@@ -38,7 +29,22 @@ int main(){
     while(1)
     {
         printf("im alive\n");
-        sleep(1);
+        pause();
+        switch (g_last_signal)
+        {
+            case SIGINT:
+                printf("^C doesnt't work\n");
+                break;
+            case SIGQUIT:
+                printf("^\\ doesn't work\n");
+                break;
+            case SIGTERM:
+                printf("SIGTERM doesn't work\n");
+                break;
+            default:
+                printf("unknown signal");
+                break;
+        }
     }
     return 1;
 }
