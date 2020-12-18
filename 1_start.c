@@ -4,7 +4,7 @@
 #include <stdio.h>
 #ifdef S_BLKSIZE
 #define BL_SIZE S_BLKSIZE
-#else 
+#else
 #include <sys/param.h>
 #define BL_SIZE DEV_BSIZE
 #endif
