@@ -22,8 +22,8 @@ int regfilecp(char *source_path, char  *target_dir_path, char *file_name)
         perror("Failed to stat");
         return -1;
     }
-    char target_path[PATH_MAX];
-    snprintf(target_path, sizeof(target_path), "%s/%s", target_dir_path, file_name);
+    char *target_path;
+    asprintf(&target_path, "%s/%s", target_dir_path, file_name);
     int dst_fd = open(target_path, O_WRONLY|O_CREAT|O_TRUNC, stat_buf.st_mode);
     if (dst_fd == -1){
         perror("Failed to open target file:");
@@ -34,8 +34,11 @@ int regfilecp(char *source_path, char  *target_dir_path, char *file_name)
         perror("Failed to fchmod");
         return -1;
     }
-    struct timespec am_time[2] = {{stat_buf.st_atime, 0},{stat_buf.st_mtime, 0}};
-
+#ifdef __APPLE__
+    struct timespec am_time[2] = {stat_buf.st_atimespec,stat_buf.st_mtimespec};
+#else
+    struct timespec am_time[2] = {stat_buf.st_atim,stat_buf.st_mtim};
+#endif
     while (1){
         uint8_t buf[4096];
         ssize_t buf_size = read(src_fd, buf, sizeof(buf));
@@ -63,36 +66,30 @@ int regfilecp(char *source_path, char  *target_dir_path, char *file_name)
         }
 
     }
+    int err = 0;
+    if (fsync(dst_fd))
+    {
+        perror("Failed to fsync");
+        err = -1;
+    }
     if (futimens(dst_fd, am_time) == -1)
     {
         perror("Failed to futimens");
-        return -1;
+        err = -1;
     }
     close(src_fd);
     close(dst_fd);
-    return 1;
+    return err;
 }
-
-void getname(char *path, char *name)
-{
-    int i, len = strlen(path); 
-    
-    for(; len > 0 && *(path+len) != '/'; len--);
-
-    for(i = 0, len++; *(path+len) != 0;len++)  
-    name[i++] = *(path+len);
-    name[i] = 0;
-}
-
 int main(int argc, char *argv[])
 {
     if (argc != 3)
     {
-        printf("Usage: %s [source dir] [target dir]", argv[1]);
+        printf("Usage: %s source dir target dir", argv[1]);
         return 1;
     }
-    char dirname[20];
-    getname(argv[1], dirname);
+    char *dirname;
+    dirname = strchr(argv[1], '/');
     DIR *dir_str = opendir(argv[1]);
     if (dir_str == NULL)
     {
@@ -106,8 +103,8 @@ int main(int argc, char *argv[])
         perror("Failed to dirfd: ");
         return -1;
     }
-    char target_path[PATH_MAX];
-    snprintf(target_path, sizeof(target_path), "%s/%s", argv[2], dirname);
+    char *target_path;
+    asprintf(&target_path, "%s/%s", argv[2], dirname);
     if (mkdir(target_path, 0755) == -1)
     {
         perror("Failed to mkdir:");
@@ -119,9 +116,9 @@ int main(int argc, char *argv[])
     struct dirent *dir;
     while ((dir = readdir(dir_str)) != NULL)
     {
-        char source_path[PATH_MAX];
+        char *source_path;
         struct stat stat_buf;
-        snprintf(source_path, sizeof(source_path), "%s/%s", argv[1], dir->d_name);
+        asprintf(&source_path, "%s/%s", argv[1], dir->d_name);
         if (lstat(source_path, &stat_buf) == -1)
         {
             perror("Failed to lstat:");
@@ -138,8 +135,8 @@ int main(int argc, char *argv[])
         }
         else if (S_ISDIR(stat_buf.st_mode))
         {
-            char target_dir_path[PATH_MAX];
-            snprintf(target_dir_path, sizeof(target_dir_path), "%s/%s", target_path, dir->d_name);
+            char *target_dir_path;
+            asprintf(&target_dir_path, "%s/%s", target_path, dir->d_name);
             if (mkdir(target_dir_path, stat_buf.st_mode) == -1)
             {
                 printf("%s has been copied\n", dir->d_name);
