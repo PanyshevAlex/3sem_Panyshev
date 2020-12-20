@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         perror("Failed to fsync");
         err = -1;
     }
-    if (fchmod(dst_fd, stat_buf.st_mode) == -1)
+    if (fchmod(dst_fd, stat_buf.st_mode & ALLPERMS) == -1)
     {
         perror("Failed to fchmod");
         err = -1;
