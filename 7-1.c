@@ -23,7 +23,11 @@ int regfilecp(char *source_path, char  *target_dir_path, char *file_name)
         return -1;
     }
     char *target_path;
-    asprintf(&target_path, "%s/%s", target_dir_path, file_name);
+    if (asprintf(&target_path, "%s/%s", target_dir_path, file_name))
+    {
+        printf("Failed to asprintf: Insufficient storage space is available.");
+        return 1;
+    }
     int dst_fd = open(target_path, O_WRONLY|O_CREAT|O_TRUNC, stat_buf.st_mode);
     if (dst_fd == -1){
         perror("Failed to open target file:");
@@ -104,7 +108,11 @@ int main(int argc, char *argv[])
         return -1;
     }
     char *target_path;
-    asprintf(&target_path, "%s/%s", argv[2], dirname);
+    if (asprintf(&target_path, "%s/%s", target_dir_path, file_name))
+    {   
+        printf("Failed to asprintf: Insufficient storage space is available.");
+        return 1;
+    } 
     if (mkdir(target_path, 0755) == -1)
     {
         perror("Failed to mkdir:");
