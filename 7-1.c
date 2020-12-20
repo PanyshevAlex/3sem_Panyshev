@@ -22,11 +22,12 @@ int regfilecp(char *source_path, char  *target_dir_path, char *file_name)
         perror("Failed to stat");
         return -1;
     }
+    printf("%s\n%s\n", target_dir_path, file_name);
     char *target_path;
-    if (asprintf(&target_path, "%s/%s", target_dir_path, file_name))
+    if (asprintf(&target_path, "%s/%s", target_dir_path, file_name) < 0)
     {
         printf("Failed to asprintf: Insufficient storage space is available.");
-        return 1;
+        return -1;
     }
     int dst_fd = open(target_path, O_WRONLY|O_CREAT|O_TRUNC, stat_buf.st_mode);
     if (dst_fd == -1){
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     char *dirname;
-    dirname = strchr(argv[1], '/');
+    dirname = strrchr(argv[1], '/');
     DIR *dir_str = opendir(argv[1]);
     if (dir_str == NULL)
     {
@@ -108,12 +109,12 @@ int main(int argc, char *argv[])
         return -1;
     }
     char *target_path;
-    if (asprintf(&target_path, "%s/%s", argv[2], dirname) < 0)
+    if (asprintf(&target_path, "%s%s", argv[2], dirname) < 0)
     {   
         printf("Failed to asprintf: Insufficient storage space is available.");
         return 1;
     } 
-    free(dirname);
+    
     if (mkdir(target_path, 0755) == -1)
     {
         perror("Failed to mkdir:");
@@ -151,8 +152,9 @@ int main(int argc, char *argv[])
                 printf("%s has been copied\n", dir->d_name);
             }
         }
+        free(source_path);
     }
-
+    free(target_path);
 
     close(dir_fd);
     closedir(dir_str);
