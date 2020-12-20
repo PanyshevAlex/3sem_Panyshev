@@ -15,8 +15,11 @@ void my_callback(fsw_cevent const *const events,
                  const unsigned int event_num,
                  void *data)
 {
-    if (events->flags_num == 2) // флаг для события Created
-        printf("%s was created\n", events->path);
+    for (int i = 0; i < event_num; i++)
+    {
+        if (events[i].flags_num == 2) // флаг для события Created
+            printf("%s was created\n", events[i].path);
+    }
 }
 
 void *start_monitor(void *param)
