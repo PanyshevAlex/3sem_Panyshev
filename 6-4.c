@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdlib.h>
 
 const char *dir_type(uint8_t type)
 {
