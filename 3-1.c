@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
         perror("Failed to open source file");
         return 2;
     }
-    int dst_fd = open(argv[2], O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);//-rw-r--r--r--
+    int dst_fd = open(argv[2], O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);//-rw-r--r--
     if (dst_fd == -1){
         perror("Failed to open target file");
         return 2;
@@ -39,8 +39,10 @@ int main(int argc, char *argv[])
 
         if (buf_size == -1){
             perror("Failed to read a block");
-            close(src_fd);
-            close(dst_fd);
+            if (close(src_fd) == -1)
+                perror("Failed to close");
+            if (close(dst_fd) == -1)
+                perror("Failed to close");
             return 2;
         }
         if (buf_size == 0){
@@ -53,15 +55,20 @@ int main(int argc, char *argv[])
 
             if (write_result == -1){
                 perror("Failed to write");
-                close(src_fd);
-                close(dst_fd);
+                if (close(src_fd) == -1) 
+                    perror("Failed to close");
+                if (close(dst_fd) == -1) 
+                    perror("Failed to close");
                 return 3;
             }
             bytes_written += (size_t)write_result;
         }
     }
-    fsync(dst_fd);
-    close(src_fd);
-    close(dst_fd);
+    if (fsync(dst_fd) == -1)
+        perror("Failed to fsync");
+    if (close(src_fd) == -1)
+        perror("Failed to close");
+    if (close(dst_fd) == -1)
+        perror("Failed to close");
     return 0;
 }

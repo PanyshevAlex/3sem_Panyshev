@@ -44,8 +44,10 @@ int main(int argc, char *argv[])
 
         if (buf_size == -1){
             perror("Failed to read a block");
-            close(src_fd);
-            close(dst_fd);
+            if (close(src_fd) == -1) 
+                perror("Failed to close");
+            if (close(dst_fd) == -1) 
+                perror("Failed to close");
         }
         if (buf_size == 0){
             break;
@@ -57,8 +59,10 @@ int main(int argc, char *argv[])
         
             if (write_result == -1){
                 perror("Failed to write");
-                close(src_fd);
-                close(dst_fd);
+                if (close(src_fd) == -1) 
+                    perror("Failed to close");
+                if (close(dst_fd) == -1) 
+                    perror("Failed to close");
                 return 3;
             }
             bytes_written += (size_t)write_result;
@@ -81,7 +85,15 @@ int main(int argc, char *argv[])
         perror("Failed to futimens");
         err = -1;
     }
-    close(src_fd);
-    close(dst_fd);
+    if (close(src_fd) == -1)
+    {
+        perror("Failed to close");
+        err = -1;
+    }
+    if (close(dst_fd) == -1)
+    {
+        perror("Failed to close");
+        err = -1;
+    }
     return err;
 }
