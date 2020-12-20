@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include <limits.h>
 #include <string.h>
-
+#include <stdlib.h>
 int regfilecp(char *source_path, char  *target_dir_path, char *file_name)
 {
     int src_fd = open(source_path, O_RDONLY);
@@ -108,11 +108,12 @@ int main(int argc, char *argv[])
         return -1;
     }
     char *target_path;
-    if (asprintf(&target_path, "%s/%s", target_dir_path, file_name))
+    if (asprintf(&target_path, "%s/%s", argv[2], dirname) < 0)
     {   
         printf("Failed to asprintf: Insufficient storage space is available.");
         return 1;
     } 
+    free(dirname);
     if (mkdir(target_path, 0755) == -1)
     {
         perror("Failed to mkdir:");
